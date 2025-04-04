@@ -31,21 +31,21 @@ function Interview() {
     };
 
     return(
-        <div className="my-10">
-        <h2 className="font-bold text-2xl text-center">Let's Get Started</h2>
+        <div className="my-5">
+        <h2 className="font-bold text-2xl text-center text-blue-500">Let's Get Started</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
           <div className="flex flex-col my-5 gap-5">
             <div className="flex flex-col p-5 rounded-lg border gap-5">
-              <h2 className="text-sm">
-                <strong>Job Role/Job Position: </strong>
+              <h2 className="text-sm text-gray-500">
+                <strong className='text-blue-500'>Job Role/Job Position: </strong>
                 {interviewData?.jobPosition}
               </h2>
-              <h2 className="text-sm">
-                <strong>Job Description/Job Stack: </strong>
+              <h2 className="text-sm text-gray-500">
+                <strong className='text-blue-500'>Job Description/Job Stack: </strong>
                 {interviewData?.jobDesc}
               </h2>
-              <h2 className="text-sm">
-                <strong>Years of Experience: </strong>
+              <h2 className="text-sm text-gray-500">
+                <strong className='text-blue-500'>Years of Experience: </strong>
                 {interviewData?.jobExperience}
               </h2>
             </div>
@@ -72,16 +72,16 @@ function Interview() {
                 <WebcamIcon className="h-55 w-full my-4 p-20 bg-secondary rounded-lg border" />
                 <Button
                 onClick={() => setWebCamEnabled(true)}
-                className={`${webCamEnabled ? "w-full" : "w-full"}`}>
+                className={`${webCamEnabled ? "w-full" : "w-full"} bg-blue-300`}>
                 {webCamEnabled ? "Close WebCam" : "Enable WebCam"}
               </Button>
               </div>
             }
           </div>
         </div>
-        <div className="flex justify-center my-4 md:my-0 md:justify-end md:items-end">
+        <div className="flex justify-center my-4 md:-my-13 md:justify-end md:items-end">
           <Link href={"/dashboard/interview/" + params.interviewId + "/start"}>
-            <Button>Start Interview</Button>
+            <Button className='bg-blue-500 '>Start Interview</Button>
           </Link>
         </div>
       </div>

@@ -52,7 +52,7 @@ function StartInterview() {
           interData={interData}
         />
       </div>
-      <div className="flex gap-3 my-5  md:my-0  md:justify-end md:gap-6">
+      <div className="flex gap-3 my-5  md:-my-8  md:justify-end md:gap-6">
         {activeQuestionIndex > 0 && (
           <Button
             onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}

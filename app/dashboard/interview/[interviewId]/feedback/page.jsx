@@ -104,7 +104,8 @@ const Feedback = () => {
         </>
       )}
 
-      <Button onClick={() => router.replace("/dashboard")}>Go Home</Button>
+      <Button onClick={() => router.replace("/dashboard")}
+        className='bg-blue-500 rounded-full'>Go Home</Button>
     </div>
   );
 };

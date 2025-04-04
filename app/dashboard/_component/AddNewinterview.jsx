@@ -76,7 +76,7 @@ function AddNewinterview() {
     <div>
       <div className='p-10 border rounded-lg bg-secondary hover:scale-105 hover:shadow-md cursor-pointer transition-all'
         onClick={()=>setOpenDailog(true)}>
-        <h2  className='font-bold text-lg text-center'> +Add New</h2>
+        <h2  className='font-bold text-lg text-center text-blue-500'> +Add New</h2>
       </div>
       <Dialog open={openDailog}>
         <DialogContent>
@@ -90,11 +90,11 @@ function AddNewinterview() {
                     <h2>Add details about job position,job description and year of experience</h2>
                     <div className='mt-7 my-2'>
                         <label className='font-semibold'>Job Role/Job Position</label>
-                        <Input placeholder="Ex. Full Stack developer" required onChange={(event)=>setJobRole(event.target.value)}/>
+                        <Input placeholder="Ex. Full Stack developer"  required onChange={(event)=>setJobRole(event.target.value)}/>
                     </div>
                     <div className=' my-2'>
-                        <label className='font-semibold'>Job Description/Tech-stack</label>
-                        <Textarea placeholder="Ex. React,Next.js,Sql" required
+                        <label className='font-semibold '>Job Description/Tech-stack</label>
+                        <Textarea  placeholder="Ex. React,Next.js,Sql" required
                         onChange={(event)=>setJobDesc(event.target.value)}/>
                     </div>
                     <div className='my-2'>
@@ -105,7 +105,7 @@ function AddNewinterview() {
                 </div>
             <div className='flex gap-5 justify-end'>
                <Button type="button" variant="ghost" onClick={()=>setOpenDailog(false)}>cancel</Button>
-                <Button type="submit" disabled={loading}>
+                <Button type="submit" disabled={loading} className='bg-blue-400'>
                     {loading?
                     <>
                     <LoaderCircle className='animate-spin'/>'Generating from AI'
