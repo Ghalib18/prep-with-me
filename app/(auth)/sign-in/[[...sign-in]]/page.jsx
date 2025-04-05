@@ -19,10 +19,10 @@ export default function Page() {
       </div>
 
       {/* Right Side - SignIn */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-white dark:bg-gray-900 p-6">
+      <div className="w-full md:w-1/2  md:h-[430px] flex items-center justify-center bg-white dark:bg-gray-900 p-6">
         <div className="max-w-md w-full text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-            Welcome to Prep-With-AI
+          <h1 className="text-xl font-extrabold text-gray-900 dark:text-white">
+            Welcome to AI-Mock_Inetrview
           </h1>
           {/* <p className="mt-4 text-lg font-semibold text-gray-500 dark:text-gray-400">
             Log in to access your AI interview assistant.
