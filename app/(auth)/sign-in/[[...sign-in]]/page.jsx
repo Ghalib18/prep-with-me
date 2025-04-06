@@ -4,18 +4,12 @@ export default function Page() {
   return (
     <section className="flex h-screen w-full">
       {/* Left Side - Image */}
-      <div className="w-1/2 hidden md:flex items-center justify-center relative bg-gray-900">
+      <div className="w-[660px] hidden md:flex items-center justify-center relative bg-gray-900">
         <img
           alt="Interview Illustration"
-          src="https://www.southmoorschool.co.uk/wp-content/uploads/job_interview_illustration.jpg"
+          src="/1741529607505.jpeg"
           className="absolute inset-0 w-full h-full object-cover opacity-80"
         />
-        <div className="relative text-center text-white p-8 mt-auto pb-12">
-          <h2 className="text-4xl font-extrabold">Welcome to Prep With AI 📊</h2>
-          <p className="mt-4 text-lg font-semibold text-white/90">
-            Your AI-powered interview preparation assistant.
-          </p>
-        </div>
       </div>
 
       {/* Right Side - SignIn */}
