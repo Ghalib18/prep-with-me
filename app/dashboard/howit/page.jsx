@@ -16,7 +16,7 @@ const HowItWorks = () => {
           content="Learn how our AI Mock Interview works."
         />
       </Head>
-      <main className="bg-gray-100 p-8 mt-5">
+      <main className="bg-gray-100 p-8 mt-10">
         <h1 className="text-4xl font-bold text-center text-blue-700 mb-8">How It Works</h1>
         <section className="space-y-8">
           <Accordion type="single" collapsible>

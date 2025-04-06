@@ -1,126 +1,191 @@
-"use client"
-import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
-import Webcam from 'react-webcam'
-import { Button } from '@/components/ui/button'
-import useSpeechToText from 'react-hook-speech-to-text';
-import { Mic } from 'lucide-react'
-import { toast } from 'sonner'
-import { chatSession } from '@/utils/Gemini_AI'
-import {db} from '@/utils/db'
-import { UserAnswer } from '@/utils/schema'
-import { useUser } from '@clerk/nextjs'
-import moment from 'moment/moment'
+"use client";
 
-function RecordAnswerSection({ mockInterviewQuestion,activeQuestionIndex,interData}) {
-  const {
-    error,
-    interimResult,
-    isRecording,
-    results,
-    startSpeechToText,
-    stopSpeechToText,
-    setResults,
-  } = useSpeechToText({
-    continuous: true,
-    useLegacyResults: false
-  });
-  const [userAnswer ,setUserAnswer]=useState('')
-  const {user}=useUser();
-  const [loading,setLoading]=useState(false);
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import React, { useContext, useEffect, useState, useRef } from "react";
+import Webcam from "react-webcam";
+import { Mic } from "lucide-react";
+import { toast } from "sonner";
+import { chatSession } from "@/utils/Gemini_AI";
+import { db } from "@/utils/db";
+import { UserAnswer } from "@/utils/schema";
+import { useUser } from "@clerk/nextjs";
+import moment from "moment";
+import { WebCamContext } from "@/app/dashboard/layout";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-  useEffect(()=>{
-    results.map((result)=>(
-      setUserAnswer(prevAns=>prevAns+result?.transcript)
-    ))
-  },[results])
+const RecordAnswerSection = ({
+  mockInterviewQuestion,
+  activeQuestionIndex,
+  interData,
+}) => {
+  const [userAnswer, setUserAnswer] = useState("");
+  const { user } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const { webCamEnabled, setWebCamEnabled } = useContext(WebCamContext);
+  const mediaRecorderRef = useRef(null);
+  const chunksRef = useRef([]);
 
-  useEffect(()=>{
-     if(!isRecording&&userAnswer.length>10){
-      upddateUserAnswerInDb();
-     }
-  },[userAnswer])
-   const StartStopRecording=async()=>{
-    if(isRecording){
-      stopSpeechToText()
-      // if(userAnswer.length<10){
-      //   setLoading(false);
-      //   toast('Error while saving your answer,please record again')
-      //   return;
-      // }
-      
+  const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API);
+
+  useEffect(() => {
+    if (!isRecording && userAnswer.length > 10) {
+      updateUserAnswer();
     }
-    else{
-      startSpeechToText()
+  }, [userAnswer]);
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorderRef.current = new MediaRecorder(stream);
+      chunksRef.current = [];
+
+      mediaRecorderRef.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorderRef.current.onstop = async () => {
+        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        await transcribeAudio(audioBlob);
+      };
+
+      mediaRecorderRef.current.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error("Error starting recording:", error);
+      toast("Error starting recording. Please check your microphone permissions.");
     }
-   }
+  };
 
-   const upddateUserAnswerInDb=async()=>{
-    console.log(userAnswer)
-    setLoading(true);
-    const feedbackPrompt =
-    "Question:" +
-    mockInterviewQuestion[activeQuestionIndex]?.Question +
-    ", User Answer:" +
-    userAnswer +
-    " , Depends on question and user answer for given interview question" +
-    " please give us rating for answer and feedback as area of improvement if any " +
-    "in just 3 to 5 lines to improve it in JSON format with rating field and feedback field";
-     
-    const result=await chatSession.sendMessage(feedbackPrompt);
-    const mockJsonResp=result.response
-    .text()
-    .replace("```json", "")
-    .replace("```", "")
-    .trim();
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
 
-    console.log(mockJsonResp);
-    const JsonFeedbackResp=JSON.parse(mockJsonResp);
-
-    const resp = await db.insert(UserAnswer).values({
-              mockIdRef: interData?.mockId,
-              question: mockInterviewQuestion[activeQuestionIndex]?.Question,
-              correctAns: mockInterviewQuestion[activeQuestionIndex]?.Answer,
-              userAns: userAnswer,
-              feedback: JsonFeedbackResp?.feedback,
-              rating: JsonFeedbackResp?.rating,
-              userEmail: user?.primaryEmailAddress?.emailAddress,
-              createdAt: moment().format("YYYY-MM-DD"),
-            });
+  const transcribeAudio = async (audioBlob) => {
+    try {
+      setLoading(true);
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
       
-            if (resp) {
-              toast("User Answer recorded successfully");
-              setUserAnswer('');
-              setResults([])
-            }
-            setResults([])
-            setLoading(false)
-   }
+      // Convert audio blob to base64
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result.split(',')[1];
+        
+        const result = await model.generateContent([
+          "Transcribe the following audio:",
+          { inlineData: { data: base64Audio, mimeType: "audio/webm" } },
+        ]);
+
+        const transcription = result.response.text();
+        setUserAnswer((prevAnswer) => prevAnswer + " " + transcription);
+        setLoading(false);
+      };
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+      toast("Error transcribing audio. Please try again.");
+      setLoading(false);
+    }
+  };
+
+  const updateUserAnswer = async () => {
+    try {
+      setLoading(true);
+      const feedbackPrompt =
+        "Question:" +
+        mockInterviewQuestion[activeQuestionIndex]?.Question +
+        ", User Answer:" +
+        userAnswer +
+        " , Depends on question and user answer for given interview question" +
+        " please give us rating for answer and feedback as area of improvement if any " +
+        "in just 3 to 5 lines to improve it in JSON format with rating field and feedback field";
+
+      const result = await chatSession.sendMessage(feedbackPrompt);
+
+      let MockJsonResp = result.response.text();
+      console.log(MockJsonResp);
+
+      // Removing possible extra text around JSON
+      MockJsonResp = MockJsonResp.replace("```json", "").replace("```", "");
+
+      // Attempt to parse JSON
+      let jsonFeedbackResp;
+      try {
+        jsonFeedbackResp = JSON.parse(MockJsonResp);
+      } catch (e) {
+        throw new Error("Invalid JSON response: " + MockJsonResp);
+      }
+
+      const resp = await db.insert(UserAnswer).values({
+        mockIdRef: interData?.mockId,
+        question: mockInterviewQuestion[activeQuestionIndex]?.Question,
+        correctAns: mockInterviewQuestion[activeQuestionIndex]?.Answer,
+        userAns: userAnswer,
+        feedback: jsonFeedbackResp?.feedback,
+        rating: jsonFeedbackResp?.rating,
+        userEmail: user?.primaryEmailAddress?.emailAddress,
+        createdAt: moment().format("YYYY-MM-DD"),
+      });
+
+      if (resp) {
+        toast("User Answer recorded successfully");
+      }
+      setUserAnswer("");
+      setLoading(false);
+    } catch (error) {
+      console.error(error);
+      toast("An error occurred while recording the user answer");
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className='flex items-center justify-center flex-col'>
-    <div className='flex flex-col my-5  h-[220px] w-[350px] bg-black rounded-lg p-5'>
-      <Image src={'/cam.png'} width={200} height={170}  alt='image' className='absolute'/>
-      <Webcam
-      mirrored={true}
-      style={{
-        height:200,
-        width:'100%',
-        zIndex:10
-      }}
-      />
+    <div className="flex flex-col items-center justify-center overflow-hidden">
+      <div className="flex flex-col justify-center items-center rounded-lg p-5 bg-black mt-4 w-[30rem] ">
+        {webCamEnabled ? (
+          <Webcam
+            mirrored={true}
+            style={{ height: 250, width: "100%", zIndex: 10 }}
+          />
+        ) : (
+          <Image src={"/cam.png"} width={200} height={200} alt="Camera placeholder" />
+        )}
       </div>
-      <Button 
-      disabled={loading} variant='outline' className='rounded-4xl'
-      onClick={StartStopRecording}
-      >
-        {isRecording?
-          <h2 className='text-red-600 flex gap-2'>
-            <Mic/>'stop-recording...'
-          </h2>
-          :  'Record Answer' }</Button>
-         
+      <div className="md:flex mt-4 md:mt-8 md:gap-5">
+        <div className="my-4 md:my-0">
+          <Button onClick={() => setWebCamEnabled((prev) => !prev)}>
+            {webCamEnabled ? "Close WebCam" : "Enable WebCam"}
+          </Button>
+        </div>
+        <Button
+          variant="outline"
+          onClick={isRecording ? stopRecording : startRecording}
+          disabled={loading}
+        >
+          {isRecording ? (
+            <h2 className="text-red-400 flex gap-2 ">
+              <Mic /> Stop Recording...
+            </h2>
+          ) : (
+            " Record Answer"
+          )}
+        </Button>
+      </div>
+      {/* Check transcription code */}
+      {/* {userAnswer && (
+        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
+          <h3 className="font-bold">Transcribed Answer:</h3>
+          <p>{userAnswer}</p>
+        </div>
+      )} */}
     </div>
-  )
-}
+  );
+};
 
-export default RecordAnswerSection
+export default RecordAnswerSection;

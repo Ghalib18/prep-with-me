@@ -9,12 +9,14 @@ import { Lightbulb, WebcamIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Webcam from "react-webcam";
 import Link from "next/link";
+import { useContext } from 'react';
+import { WebCamContext } from "../../layout";
 
 function Interview() {
     const params = useParams();
     const [interviewData,setInterviewData]=useState(); 
-    // const { webCamEnabled, setWebCamEnabled } = useContext(WebCamContext);
-    const [webCamEnabled, setWebCamEnabled ]  = useState(false);
+    const { webCamEnabled, setWebCamEnabled } = useContext(WebCamContext);
+    // const [webCamEnabled, setWebCamEnabled ]  = useState(false);
 
 
     useEffect(() => {
@@ -78,7 +80,7 @@ function Interview() {
             }
             <div>
             <Button
-                onClick={() => setWebCamEnabled(true)}
+                onClick={() => setWebCamEnabled((prev) => !prev)}
                 className={`${webCamEnabled ? "w-full" : "w-full"} bg-blue-300`}>
                 {webCamEnabled ? "Close WebCam" : "Enable WebCam"}
               </Button>

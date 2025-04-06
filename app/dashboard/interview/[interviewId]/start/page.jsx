@@ -38,7 +38,7 @@ function StartInterview() {
 
   return (
     <div >
-      <div className="grid grid-cols-1 md:grid-cols-2 my-5 gap-40">
+      <div className="grid grid-cols-1 md:grid-cols-2 my-10 gap-10 ">
         {/* Question Section */}
         <QuestionSection
           mockInterviewQuestion={mockInterviewQuestion}
@@ -52,7 +52,7 @@ function StartInterview() {
           interData={interData}
         />
       </div>
-      <div className="flex gap-3 my-5  md:-my-8  md:justify-end md:gap-6">
+      <div className="flex gap-3 my-5  md:-my-0  md:justify-end md:gap-6">
         {activeQuestionIndex > 0 && (
           <Button
             onClick={() => setActiveQuestionIndex(activeQuestionIndex - 1)}

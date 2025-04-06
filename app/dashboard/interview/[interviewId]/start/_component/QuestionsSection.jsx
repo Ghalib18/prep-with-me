@@ -13,12 +13,12 @@ const QuestionSection = ({ mockInterviewQuestion, activeQuestionIndex }) => {
 
   return (
     mockInterviewQuestion && (
-      <div className="flex flex-col justify-between p-3 border rounded-lg w-[500px] h-[350px] -ml-30 bg-secondary">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="flex flex-col justify-between p-5 border rounded-lg my-1 bg-secondary">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
           {mockInterviewQuestion.map((question, index) => (
             <h2
               key={index}
-              className={`rounded-full text-center text-xs md:text-xs cursor-pointer md:block hidden shadow-md p-1 ${
+              className={`rounded-full text-center text-xs md:text-sm cursor-pointer md:block hidden shadow-md p-2 ${
                 activeQuestionIndex === index
                   ? "bg-blue-500 text-white"
                   : "bg-secondary"
@@ -29,7 +29,7 @@ const QuestionSection = ({ mockInterviewQuestion, activeQuestionIndex }) => {
           ))}
         </div>
 
-        <h2 className="text-xs md:text-sm">
+        <h2 className=" my-5 text-md md:text-lg">
           {mockInterviewQuestion[activeQuestionIndex]?.Question}
         </h2>
 
@@ -45,7 +45,7 @@ const QuestionSection = ({ mockInterviewQuestion, activeQuestionIndex }) => {
             <Lightbulb />
             <strong>Note:</strong>
           </h2>
-          <h2 className="text-xs text-blue-600 my-2">
+          <h2 className="text-sm text-blue-600 my-2">
             {process.env.NEXT_PUBLIC_QUESTION_NOTE}
           </h2>
         </div>
