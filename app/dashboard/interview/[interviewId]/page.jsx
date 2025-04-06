@@ -30,21 +30,21 @@ function Interview() {
         setInterviewData(result[0]);
     };
 
-    return(
-        <div className="my-5">
+     return(
+        <div className="my-10">
         <h2 className="font-bold text-2xl text-center text-blue-500">Let's Get Started</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 ">
           <div className="flex flex-col my-5 gap-5">
             <div className="flex flex-col p-5 rounded-lg border gap-5">
-              <h2 className="text-sm text-gray-500">
-                <strong className='text-blue-500'>Job Role/Job Position: </strong>
+              <h2 className="text-lg text-gray-500">
+                <strong className='text-blue-500 '>Job Role/Job Position: </strong>
                 {interviewData?.jobPosition}
               </h2>
-              <h2 className="text-sm text-gray-500">
+              <h2 className="text-lg text-gray-500">
                 <strong className='text-blue-500'>Job Description/Job Stack: </strong>
                 {interviewData?.jobDesc}
               </h2>
-              <h2 className="text-sm text-gray-500">
+              <h2 className="text-lg text-gray-500">
                 <strong className='text-blue-500'>Years of Experience: </strong>
                 {interviewData?.jobExperience}
               </h2>
@@ -54,32 +54,38 @@ function Interview() {
                 <Lightbulb />
                 <strong>Information</strong>
               </h2>
-              <h2 className="mt-3 text-xs text-yellow-500">
+              <h2 className="mt-3  text-yellow-500">
                 {process.env.NEXT_PUBLIC_INFORMATION}
               </h2>
             </div>
           </div>
           <div>
-            {webCamEnabled ? <Webcam
+            {webCamEnabled ? (
+              <div className='flex items-center justify-center p-10'>
+              <Webcam
                   onUserMedia={() => setWebCamEnabled(true)}
                   onUserMediaError={() => setWebCamEnabled(false)}
                   height={300}
                   width={300}
                   mirrored={true}
                 />
-              :
+                </div>
+            ):
               <div>
-                <WebcamIcon className="h-55 w-full my-4 p-20 bg-secondary rounded-lg border" />
-                <Button
+                <WebcamIcon className="h-72 w-full my-6 p-20 bg-secondary rounded-lg border" />
+                
+              </div>
+            }
+            <div>
+            <Button
                 onClick={() => setWebCamEnabled(true)}
                 className={`${webCamEnabled ? "w-full" : "w-full"} bg-blue-300`}>
                 {webCamEnabled ? "Close WebCam" : "Enable WebCam"}
               </Button>
-              </div>
-            }
+            </div>
           </div>
         </div>
-        <div className="flex justify-center my-4 md:-my-13 md:justify-end md:items-end">
+        <div className="flex justify-center my-4 md:my0 md:justify-end md:items-end">
           <Link href={"/dashboard/interview/" + params.interviewId + "/start"}>
             <Button className='bg-blue-500 '>Start Interview</Button>
           </Link>
