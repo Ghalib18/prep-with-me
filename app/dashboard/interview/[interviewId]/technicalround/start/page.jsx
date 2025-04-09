@@ -71,7 +71,7 @@ function StartInterview() {
         )}
         {activeQuestionIndex == mockInterviewQuestion?.length - 1 && (
           <Link
-            href={"/dashboard/interview/" + interData?.mockId + "/feedback"}
+            href={"/dashboard/interview/" + interData?.mockId + "/technicalround/feedback"}
           >
             <Button  className='bg-blue-500 rounded-full'>End Interview</Button>
           </Link>

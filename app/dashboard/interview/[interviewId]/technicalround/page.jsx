@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import Webcam from "react-webcam";
 import Link from "next/link";
 import { useContext } from 'react';
-import { WebCamContext } from "../../layout";
+import { WebCamContext } from "../../../layout";
 
 function Interview() {
     const params = useParams();
@@ -88,7 +88,7 @@ function Interview() {
           </div>
         </div>
         <div className="flex justify-center my-4 md:my0 md:justify-end md:items-end">
-          <Link href={"/dashboard/interview/" + params.interviewId + "/start"}>
+          <Link href={"/dashboard/interview/" + params.interviewId + "/technicalround/start"}>
             <Button className='bg-blue-500 '>Start Interview</Button>
           </Link>
         </div>

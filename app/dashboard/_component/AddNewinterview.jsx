@@ -63,8 +63,8 @@ function AddNewinterview() {
          }).returning({mockId:MockInterview.mockId})
          console.log("Inserted ID:",resp);
          if(resp){
+          router.push('/dashboard/interview/'+resp[0]?.mockId+'/technicalround')
           setOpenDailog(false);
-          router.push('/dashboard/interview/'+resp[0]?.mockId)
          }
         }
         else{
@@ -76,7 +76,7 @@ function AddNewinterview() {
     <div>
       <div className='p-10 border rounded-lg bg-secondary hover:scale-105 hover:shadow-md cursor-pointer transition-all'
         onClick={()=>setOpenDailog(true)}>
-        <h2  className='font-bold text-lg text-center text-blue-500'> +Add New</h2>
+        <h2  className='font-bold text-lg text-center text-blue-500'> Technical Round</h2>
       </div>
       <Dialog open={openDailog}>
         <DialogContent>
