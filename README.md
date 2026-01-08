@@ -53,35 +53,35 @@ This tool gives you an **interactive and personalized practice environment.**
 ### 🏠 Home Screen
 Welcome page where users enter their name and select interview preferences.
 
-![Home Screen](images/home.png)
+![Home Screen](images/landing_page.png)
 
 ---
 
 ### 📂 Select Field of Interest
 User selects the domain in which they want to be interviewed.
 
-![Field Selection](images/field_selection.png)
+![Field Selection](images/dashboard_page_1.png)
 
 ---
 
 ### 🔍 Technical Interview Interface
 Gemini Flash generates technical questions dynamically and records user answers.
 
-![Technical Round](images/technical_round.png)
+![Technical Round](images/technical_interview_section.png)
 
 ---
 
 ### 💻 Coding Interview Interface
 Interactive coding questions are presented based on the user’s selected field.
 
-![Coding Round](images/coding_round.png)
+![Coding Round](images/coding_interview_section.png)
 
 ---
 
 ### 📊 AI-Powered Feedback
 After users submit their answers, Gemini Flash evaluates and offers detailed feedback.
 
-![Feedback](images/feedback.png)
+![Feedback](images/feedback_technical_section.png)
 
 ---
 
