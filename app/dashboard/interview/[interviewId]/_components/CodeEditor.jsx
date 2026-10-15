@@ -3,90 +3,145 @@
 import React, { useEffect, useRef, useState } from "react";
 import Editor, { loader } from "@monaco-editor/react";
 import { Button } from "@/components/ui/button";
+import { RotateCcw, Check, Copy } from "lucide-react";
+import { toast } from "sonner";
 
-const CodeEditor = ({ onValueChange, language }) => {
+const CodeEditor = ({ onValueChange, language, initialCode = "" }) => {
   const editorRef = useRef(null);
-  const [output, setOutput] = useState("");
-  const [value, setValue] = useState();
+  const [copied, setCopied] = useState(false);
+
+  const getMonacoLang = (lang) => {
+    const l = (lang || "").toLowerCase();
+    if (l.includes("py")) return "python";
+    if (l.includes("java") && !l.includes("script")) return "java";
+    if (l.includes("script") || l.includes("js")) return "javascript";
+    if (l.includes("ts")) return "typescript";
+    if (l.includes("c++") || l.includes("cpp")) return "cpp";
+    if (l.includes("go")) return "go";
+    return "javascript";
+  };
+
+  const monacoLanguage = getMonacoLang(language);
 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
+
+    // Listen to changes in real-time so the user doesn't have to manually click Save!
+    editor.onDidChangeModelContent(() => {
+      const code = editor.getValue();
+      onValueChange(code);
+    });
+
+    // Initial trigger
+    const initial = editor.getValue();
+    if (initial) {
+      onValueChange(initial);
+    }
   };
 
-  useEffect(() => {
-    setValue(language?.toLowerCase());
-  }, [language]);
+  const handleReset = () => {
+    if (editorRef.current) {
+      const defaultStarter = `// Write your ${language || "code"} solution here\n\n`;
+      editorRef.current.setValue(defaultStarter);
+      onValueChange(defaultStarter);
+      toast.info("Editor reset to starter template");
+    }
+  };
 
-  const extractCode = () => {
+  const handleCopy = () => {
     if (editorRef.current) {
       const code = editorRef.current.getValue();
-      onValueChange(code); // This will pass the value of code in parent element
-    }
-  };
-
-  const runCode = () => {
-    const code = editorRef.current.getValue();
-    try {
-      // Using new Function to execute the code (for demonstration purposes only)
-      const result = new Function(code)();
-      setOutput(result);
-    } catch (err) {
-      setOutput(err.toString());
+      navigator.clipboard.writeText(code);
+      setCopied(true);
+      toast.success("Code copied to clipboard!");
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   useEffect(() => {
-    // Load the monaco instance
+    // Configure custom Monaco dark theme
     loader.init().then((monaco) => {
-      // Define the custom theme
-      monaco.editor.defineTheme("myCustomTheme", {
-        base: "hc-black", // you can also use 'vs' or 'hc-black'
-        inherit: true, // will inherit the base theme
-        rules: [],
+      monaco.editor.defineTheme("aiCodeTheme", {
+        base: "vs-dark",
+        inherit: true,
+        rules: [
+          { token: "comment", foreground: "64748b", fontStyle: "italic" },
+          { token: "keyword", foreground: "a855f7", fontStyle: "bold" },
+          { token: "string", foreground: "38bdf8" },
+          { token: "number", foreground: "fbbf24" },
+        ],
         colors: {
-          "editor.background": "#030712", // Background color
-          "editor.foreground": "#cbd5e1", // Default text color
-          "editor.lineHighlightBackground": "#082f49", // Line highlight color
-          "editorCursor.foreground": "#22d3ee", // Cursor color
-          "editorIndentGuide.background": "#444444", // Indentation guide color
-          "editor.selectionBackground": "#0ea5e9", // Selection color
-          // Add more customization as needed
+          "editor.background": "#030712",
+          "editor.foreground": "#e2e8f0",
+          "editor.lineHighlightBackground": "#0f172a",
+          "editorCursor.foreground": "#6366f1",
+          "editorIndentGuide.background": "#1e293b",
+          "editor.selectionBackground": "#312e81",
         },
       });
-
-      // Apply the custom theme
-      monaco.editor.setTheme("myCustomTheme");
+      monaco.editor.setTheme("aiCodeTheme");
     });
   }, []);
 
+  const defaultStarter =
+    initialCode || `// Write your ${language || "code"} solution here\n\n`;
+
   return (
-    <div>
-      <div className="border-[10px] border-gray-800 p-4 bg-gray-950">
-        <Editor
-          height="60vh"
-          width="45vw"
-          defaultLanguage={value}
-          defaultValue="// Write your code here"
-          theme="myCustomTheme"
-          onMount={handleEditorDidMount}
-        />
-      </div>
-      <div className="flex justify-end">
-        <div className="flex gap-4">
-          {/* <Button onClick={runCode} className="mt-4 bg-gray-950">
-            Check Errors
-          </Button> */}
-          <Button onClick={extractCode} className="mt-4 bg-gray-950">
-            Save
-          </Button>
+    <div className="flex flex-col h-full rounded-2xl overflow-hidden border border-border bg-slate-950 shadow-md">
+      {/* Editor Sub-header Bar */}
+      <div className="flex items-center justify-between bg-slate-900/90 px-4 py-2 border-b border-slate-800 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="h-2.5 w-2.5 rounded-full bg-red-500/80 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/80 inline-block" />
+          <span className="h-2.5 w-2.5 rounded-full bg-green-500/80 inline-block" />
+          <span className="ml-2 font-mono text-slate-300 font-medium">
+            Solution.{monacoLanguage === "python" ? "py" : monacoLanguage === "java" ? "java" : monacoLanguage === "cpp" ? "cpp" : "js"}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleCopy}
+            className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 transition-colors p-1 rounded hover:bg-slate-800"
+            title="Copy Code"
+          >
+            {copied ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={handleReset}
+            className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-slate-200 transition-colors p-1 rounded hover:bg-slate-800"
+            title="Reset to starter"
+          >
+            <RotateCcw className="h-3 w-3" />
+            <span className="hidden sm:inline">Reset</span>
+          </button>
         </div>
       </div>
-      <div
-        className={`bg-gray-200 text-red-600 rounded-lg mt-2 ${
-          output ? "p-2" : ""
-        }`}
-      >
-        {output}
+
+      {/* Monaco Container */}
+      <div className="w-full flex-1 min-h-[500px]">
+        <Editor
+          height="100%"
+          minHeight="500px"
+          language={monacoLanguage}
+          defaultValue={defaultStarter}
+          theme="aiCodeTheme"
+          onMount={handleEditorDidMount}
+          options={{
+            fontSize: 13,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            fontFamily: "var(--font-mono), Consolas, 'Courier New', monospace",
+            lineNumbers: "on",
+            renderLineHighlight: "all",
+            smoothScrolling: true,
+          }}
+        />
       </div>
     </div>
   );

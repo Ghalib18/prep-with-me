@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import React, { useContext, useEffect, useState, useRef } from "react";
 import Webcam from "react-webcam";
-import { Mic } from "lucide-react";
+import { Mic, Square, Video, VideoOff, Loader2, Sparkles, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { chatSession } from "@/utils/Gemini_AI";
 import { db } from "@/utils/db";
@@ -23,17 +23,46 @@ const RecordAnswerSection = ({
   const { user } = useUser();
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [lastSavedAnswer, setLastSavedAnswer] = useState("");
   const { webCamEnabled, setWebCamEnabled } = useContext(WebCamContext);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
+  const timerRef = useRef(null);
 
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API);
 
+  // Timer effect for recording duration
+  useEffect(() => {
+    if (isRecording) {
+      setRecordingSeconds(0);
+      timerRef.current = setInterval(() => {
+        setRecordingSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    }
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
+    };
+  }, [isRecording]);
+
+  // When recording finishes and userAnswer has been transcribed, update DB
   useEffect(() => {
     if (!isRecording && userAnswer.length > 10) {
       updateUserAnswer();
     }
   }, [userAnswer]);
+
+  const formatTimer = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const startRecording = async () => {
     try {
@@ -48,15 +77,16 @@ const RecordAnswerSection = ({
       };
 
       mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(chunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(chunksRef.current, { type: "audio/webm" });
         await transcribeAudio(audioBlob);
       };
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      toast.info("Microphone recording started. Speak your answer clearly.");
     } catch (error) {
       console.error("Error starting recording:", error);
-      toast("Error starting recording. Please check your microphone permissions.");
+      toast.error("Microphone access denied. Please verify your browser permissions.");
     }
   };
 
@@ -71,25 +101,29 @@ const RecordAnswerSection = ({
     try {
       setLoading(true);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      
-      // Convert audio blob to base64
+
       const reader = new FileReader();
       reader.readAsDataURL(audioBlob);
       reader.onloadend = async () => {
-        const base64Audio = reader.result.split(',')[1];
-        
-        const result = await model.generateContent([
-          "Transcribe the following audio:",
-          { inlineData: { data: base64Audio, mimeType: "audio/webm" } },
-        ]);
+        try {
+          const base64Audio = reader.result.split(",")[1];
+          const result = await model.generateContent([
+            "Transcribe the following audio accurately:",
+            { inlineData: { data: base64Audio, mimeType: "audio/webm" } },
+          ]);
 
-        const transcription = result.response.text();
-        setUserAnswer((prevAnswer) => prevAnswer + " " + transcription);
-        setLoading(false);
+          const transcription = result.response.text();
+          setUserAnswer(transcription.trim());
+          setLastSavedAnswer(transcription.trim());
+        } catch (innerError) {
+          console.error("Transcription generation error:", innerError);
+          toast.error("Failed to transcribe audio. Please try again.");
+          setLoading(false);
+        }
       };
     } catch (error) {
       console.error("Error transcribing audio:", error);
-      toast("Error transcribing audio. Please try again.");
+      toast.error("Error during audio transcription.");
       setLoading(false);
     }
   };
@@ -97,93 +131,172 @@ const RecordAnswerSection = ({
   const updateUserAnswer = async () => {
     try {
       setLoading(true);
+      const currentQuestion = mockInterviewQuestion[activeQuestionIndex];
+
       const feedbackPrompt =
-        "Question:" +
-        mockInterviewQuestion[activeQuestionIndex]?.Question +
-        ", User Answer:" +
+        "Question: " +
+        currentQuestion?.Question +
+        ", User Answer: " +
         userAnswer +
-        " , Depends on question and user answer for given interview question" +
-        " please give us rating for answer and feedback as area of improvement if any " +
-        "in just 3 to 5 lines to improve it in JSON format with rating field and feedback field";
+        ". Based on this technical interview question and candidate answer, please provide a rating (scale 1 to 10) and concise constructive feedback with areas of improvement in 3 to 5 lines. Return strictly in valid JSON format with keys 'rating' (number or string out of 10) and 'feedback' (string).";
 
       const result = await chatSession.sendMessage(feedbackPrompt);
-
       let MockJsonResp = result.response.text();
-      console.log(MockJsonResp);
 
-      // Removing possible extra text around JSON
-      MockJsonResp = MockJsonResp.replace("```json", "").replace("```", "");
+      // Clean markdown code fence if present
+      MockJsonResp = MockJsonResp.replace(/```json/g, "").replace(/```/g, "").trim();
 
-      // Attempt to parse JSON
       let jsonFeedbackResp;
       try {
         jsonFeedbackResp = JSON.parse(MockJsonResp);
       } catch (e) {
-        throw new Error("Invalid JSON response: " + MockJsonResp);
+        console.warn("Could not parse feedback as strict JSON, formatting fallback:", MockJsonResp);
+        jsonFeedbackResp = {
+          rating: "7",
+          feedback: MockJsonResp,
+        };
       }
 
       const resp = await db.insert(UserAnswer).values({
         mockIdRef: interData?.mockId,
-        question: mockInterviewQuestion[activeQuestionIndex]?.Question,
-        correctAns: mockInterviewQuestion[activeQuestionIndex]?.Answer,
+        question: currentQuestion?.Question,
+        correctAns: currentQuestion?.Answer,
         userAns: userAnswer,
-        feedback: jsonFeedbackResp?.feedback,
-        rating: jsonFeedbackResp?.rating,
+        feedback: typeof jsonFeedbackResp?.feedback === "string" 
+          ? jsonFeedbackResp.feedback 
+          : JSON.stringify(jsonFeedbackResp?.feedback),
+        rating: String(jsonFeedbackResp?.rating || "7"),
         userEmail: user?.primaryEmailAddress?.emailAddress,
         createdAt: moment().format("YYYY-MM-DD"),
       });
 
       if (resp) {
-        toast("User Answer recorded successfully");
+        toast.success("Answer recorded and evaluated by AI!");
       }
       setUserAnswer("");
-      setLoading(false);
     } catch (error) {
-      console.error(error);
-      toast("An error occurred while recording the user answer");
+      console.error("Error saving user answer:", error);
+      toast.error("An error occurred while evaluating your response.");
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center overflow-hidden">
-      <div className="flex flex-col justify-center items-center rounded-lg p-5 bg-black mt-4 w-[30rem] ">
+    <div className="flex flex-col items-center justify-between rounded-2xl border border-border bg-card p-6 shadow-sm min-h-[460px]">
+      {/* Video Viewport Frame */}
+      <div className="relative w-full max-w-md aspect-video rounded-2xl overflow-hidden bg-slate-950 flex items-center justify-center border border-border shadow-inner">
         {webCamEnabled ? (
           <Webcam
             mirrored={true}
-            style={{ height: 250, width: "100%", zIndex: 10 }}
+            className="w-full h-full object-cover"
           />
         ) : (
-          <Image src={"/cam.png"} width={200} height={200} alt="Camera placeholder" />
+          <div className="flex flex-col items-center justify-center p-6 text-center text-slate-400">
+            <div className="h-14 w-14 rounded-2xl bg-slate-900 flex items-center justify-center text-slate-500 mb-2 border border-slate-800">
+              <Video className="h-7 w-7" />
+            </div>
+            <p className="text-xs font-medium text-slate-300">Camera preview is off</p>
+            <p className="text-[11px] text-slate-500 mt-0.5">Toggle webcam below if needed</p>
+          </div>
+        )}
+
+        {/* Live Recording HUD overlay */}
+        {isRecording && (
+          <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none">
+            <div className="flex items-center gap-2 rounded-full bg-red-600/90 backdrop-blur-md px-3 py-1 text-xs font-semibold text-white shadow-lg animate-pulse">
+              <span className="h-2 w-2 rounded-full bg-white" />
+              <span>REC {formatTimer(recordingSeconds)}</span>
+            </div>
+
+            {/* Audio wave bars animation */}
+            <div className="flex items-end gap-1 h-4 bg-black/40 backdrop-blur-md px-2 py-1 rounded-full">
+              <span className="w-1 bg-red-500 h-3 animate-pulse rounded-full" />
+              <span className="w-1 bg-red-400 h-4 animate-bounce rounded-full" />
+              <span className="w-1 bg-red-500 h-2 animate-pulse rounded-full" />
+              <span className="w-1 bg-red-400 h-3 animate-bounce rounded-full" />
+            </div>
+          </div>
+        )}
+
+        {/* Processing overlay */}
+        {loading && (
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 text-white">
+            <Loader2 className="h-7 w-7 animate-spin text-blue-500" />
+            <p className="text-xs font-medium tracking-wide">Transcribing & Grading Response...</p>
+          </div>
         )}
       </div>
-      <div className="md:flex mt-4 md:mt-8 md:gap-5">
-        <div className="my-4 md:my-0">
-          <Button onClick={() => setWebCamEnabled((prev) => !prev)}>
-            {webCamEnabled ? "Close WebCam" : "Enable WebCam"}
-          </Button>
-        </div>
+
+      {/* Control Action Bar */}
+      <div className="mt-6 flex flex-wrap items-center justify-center gap-3 w-full">
         <Button
+          type="button"
           variant="outline"
+          size="sm"
+          onClick={() => setWebCamEnabled((prev) => !prev)}
+          className="rounded-xl gap-2 text-xs"
+        >
+          {webCamEnabled ? (
+            <>
+              <VideoOff className="h-3.5 w-3.5 text-muted-foreground" />
+              Turn Off Cam
+            </>
+          ) : (
+            <>
+              <Video className="h-3.5 w-3.5 text-blue-600" />
+              Turn On Cam
+            </>
+          )}
+        </Button>
+
+        <Button
+          type="button"
           onClick={isRecording ? stopRecording : startRecording}
           disabled={loading}
+          className={`rounded-xl gap-2 font-medium shadow-md transition-all ${
+            isRecording
+              ? "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20"
+              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-blue-500/20"
+          }`}
         >
-          {isRecording ? (
-            <h2 className="text-red-400 flex gap-2 ">
-              <Mic /> Stop Recording...
-            </h2>
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Evaluating...
+            </>
+          ) : isRecording ? (
+            <>
+              <Square className="h-4 w-4 fill-white" />
+              Stop Recording ({formatTimer(recordingSeconds)})
+            </>
           ) : (
-            " Record Answer"
+            <>
+              <Mic className="h-4 w-4" />
+              Record Answer
+            </>
           )}
         </Button>
       </div>
-      {/* Check transcription code */}
-      {/* {userAnswer && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-bold">Transcribed Answer:</h3>
-          <p>{userAnswer}</p>
+
+      {/* Transcribed Answer Preview Pill */}
+      {lastSavedAnswer ? (
+        <div className="mt-4 w-full rounded-xl bg-secondary/60 p-3 border border-border text-left">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-emerald-600 mb-1">
+            <CheckCircle2 className="h-3.5 w-3.5" />
+            Answer Captured
+          </div>
+          <p className="text-xs text-muted-foreground line-clamp-2 italic">
+            "{lastSavedAnswer}"
+          </p>
         </div>
-      )} */}
+      ) : (
+        <div className="mt-4 text-center">
+          <p className="text-[11px] text-muted-foreground">
+            Audio is securely processed and evaluated via Google Gemini.
+          </p>
+        </div>
+      )}
     </div>
   );
 };

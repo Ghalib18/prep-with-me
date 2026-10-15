@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Timer as TimerIcon, AlertCircle } from "lucide-react";
 
-const Timer = ({ initialMinutes, initialSeconds, onTimeUp }) => {
+const Timer = ({ initialMinutes = 20, initialSeconds = 0, onTimeUp }) => {
   const [minutes, setMinutes] = useState(initialMinutes);
   const [seconds, setSeconds] = useState(initialSeconds);
 
@@ -20,21 +21,30 @@ const Timer = ({ initialMinutes, initialSeconds, onTimeUp }) => {
       }
 
       if (minutes === 0 && seconds === 0) {
-        onTimeUp(true);
+        if (onTimeUp) {
+          onTimeUp(true);
+        }
       }
     }, 1000);
 
     return () => clearInterval(timerInterval);
-  }, [minutes, seconds]);
+  }, [minutes, seconds, onTimeUp]);
+
+  const isLowTime = minutes < 5;
 
   return (
-    <div className="flex flex-col items-center">
-      <div className="text-4xl font-bold flex items-center flex-col gap-1">
-        <span className="text-sm text-gray-500">Time Left: </span>
-        <p>
-          {minutes}:{seconds < 10 ? `0${seconds}` : seconds}
-        </p>
-      </div>
+    <div
+      className={`inline-flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs font-semibold border transition-colors ${
+        isLowTime
+          ? "bg-rose-50 border-rose-200 text-rose-700 animate-pulse"
+          : "bg-secondary border-border text-foreground"
+      }`}
+    >
+      <TimerIcon className={`h-3.5 w-3.5 ${isLowTime ? "text-rose-600" : "text-indigo-600"}`} />
+      <span>Time Remaining:</span>
+      <span className="font-mono font-bold text-sm tracking-tight">
+        {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+      </span>
     </div>
   );
 };
