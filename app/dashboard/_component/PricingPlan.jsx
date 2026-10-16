@@ -1,14 +1,68 @@
-export default[
-    {
-        link:'https://buy.stripe.com/test_9AQ4jI8fffk75igcMN',
-        price:7.99,
-        priceId:'price_1PUNYmSISOkj08jR30L0UpyY',
-        duration:'Monthly'
-    },
-    {
-        link:'https://buy.stripe.com/test_eVabMa8fffk78us000',
-        price:49.00,
-        priceId:'price_1PUNZQSISOkj08jRFQkKuzXi',
-        duration:'Yearly'
-    }
-]
+export const PRICING_PLANS = [
+  {
+    id: "free",
+    name: "Free Starter",
+    description: "Ideal for testing your interview readiness with free AI credits.",
+    monthlyPrice: 0,
+    yearlyPrice: 0,
+    period: "Forever Free",
+    popular: false,
+    features: [
+      "6 Free AI Sessions Total",
+      "2 Technical Mock Interviews",
+      "2 Algorithmic Coding Rounds",
+      "2 Resume ATS Analyses",
+      "Access to all Curated Study Sheets (Striver, SQL 50, etc.)",
+      "Standard AI Response Time",
+      "Community Support",
+    ],
+    buttonText: "Current Plan",
+    disabled: true,
+  },
+  {
+    id: "pro-monthly",
+    name: "Pro Monthly",
+    description: "Unlimited interview mastery for active job seekers & interviewees.",
+    monthlyPrice: 12,
+    yearlyPrice: 12,
+    period: "per month",
+    popular: false,
+    features: [
+      "Unlimited Technical Mock Interviews",
+      "Unlimited Algorithmic Coding Challenges",
+      "Unlimited Resume ATS Scans & Scorecards",
+      "Voice & Webcam Video AI Evaluation",
+      "Detailed Big-O Complexity & Code Walkthroughs",
+      "Priority Gemini 2.5 Flash Latency",
+      "Export & Print Analysis PDF Reports",
+      "Priority Email Support",
+    ],
+    buttonText: "Upgrade to Monthly",
+    disabled: false,
+    link: "https://buy.stripe.com/test_9AQ4jI8fffk75igcMN",
+  },
+  {
+    id: "pro-yearly",
+    name: "Pro Annual",
+    description: "Maximum savings for long-term career growth and multiple job cycles.",
+    monthlyPrice: 99,
+    yearlyPrice: 99,
+    equivalentMonthly: 8.25,
+    period: "per year",
+    popular: true,
+    discountBadge: "Save 30% + 2 Months Free",
+    features: [
+      "Everything in Pro Monthly",
+      "Unlimited Access for Full Year",
+      "Custom Company & Job Description Fine-Tuning",
+      "Early Access to Future AI Preparation Features",
+      "Lifetime Analysis History Archive",
+      "Dedicated 24/7 Priority Support",
+    ],
+    buttonText: "Upgrade to Annual (Best Value)",
+    disabled: false,
+    link: "https://buy.stripe.com/test_eVabMa8fffk78us000",
+  },
+];
+
+export default PRICING_PLANS;

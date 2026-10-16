@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowRight, MessageSquare, CheckCircle, Clock, Award } from "lucide-react"
+import { ArrowRight, MessageSquare, CheckCircle, Clock, Award, Terminal, Code2, FileSearch, BookOpen, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 export default function AIMockInterviewLanding() {
@@ -185,60 +185,74 @@ const handleStartClick = () => {
 
         <div className="container relative z-10 mx-auto px-4 py-16 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-center text-center">
+            {/* Tag Badge */}
+            <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-blue-100/90 px-4 py-1.5 text-xs font-bold text-blue-800 shadow-sm">
+              <Sparkles className="h-3.5 w-3.5" /> All-in-One AI Career Preparation Suite
+            </div>
+
             <AnimatedText
-              text="AI Mock Interview"
+              text="HireReady AI"
               className="text-4xl font-extrabold tracking-tight text-blue-700 sm:text-5xl md:text-6xl"
             />
 
-            <p className="mt-6 max-w-2xl text-xl text-blue-600">
-              Practice your interview skills with our AI-powered mock interview platform. Get real-time feedback and
-              improve your chances of landing your dream job.
+            <h2 className="mt-3 text-lg sm:text-2xl font-bold text-blue-900 max-w-2xl">
+              Master Technical Mock Interviews, Algorithmic Coding & ATS Resumes
+            </h2>
+
+            <p className="mt-4 max-w-2xl text-base sm:text-lg text-blue-600 leading-relaxed">
+              Practice voice-driven mock interviews with webcam simulation, solve LeetCode-style algorithmic challenges in Monaco editor, optimize your resume with AI ATS scoring, and explore curated sheets.
             </p>
 
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <button  onClick={handleStartClick} className="group relative overflow-hidden rounded-full bg-blue-600 px-8 py-6 text-lg font-semibold text-white transition-all hover:bg-blue-700">
-                Start Your Interview
+            <div className="mt-8 flex items-center justify-center gap-x-6">
+              <button onClick={handleStartClick} className="group relative overflow-hidden rounded-full bg-blue-600 px-8 py-5 text-base sm:text-lg font-semibold text-white transition-all hover:bg-blue-700 shadow-lg shadow-blue-500/20 cursor-pointer">
+                Launch HireReady AI Dashboard
                 <ArrowRight className="ml-2 inline-block h-5 w-5 transition-transform group-hover:translate-x-1" />
                 <span className="absolute inset-0 h-full w-full bg-white/20 opacity-0 transition-opacity group-hover:opacity-100" />
               </button>
             </div>
 
-            <div className="mt-20 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {/* 4 Feature Cards */}
+            <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4 w-full">
               <FeatureCard
-                icon={<MessageSquare className="h-10 w-10 text-blue-500" />}
-                title="Realistic Conversations"
-                description="Our AI simulates real interview scenarios with natural conversations and follow-up questions."
+                icon={<Terminal className="h-9 w-9 text-blue-600" />}
+                title="AI Technical Mock"
+                description="Simulate realistic interviews with voice recognition, webcam eye contact, and instant rating."
               />
               <FeatureCard
-                icon={<CheckCircle className="h-10 w-10 text-blue-500" />}
-                title="Instant Feedback"
-                description="Receive detailed feedback on your answers, communication skills, and areas for improvement."
+                icon={<Code2 className="h-9 w-9 text-indigo-600" />}
+                title="Live Coding Rounds"
+                description="Solve algorithmic challenges in Monaco editor with 5 automated test cases & Big-O feedback."
               />
               <FeatureCard
-                icon={<Clock className="h-10 w-10 text-blue-500" />}
-                title="Practice Anytime"
-                description="No scheduling needed. Practice interviews whenever you want, as many times as you need."
+                icon={<FileSearch className="h-9 w-9 text-emerald-600" />}
+                title="Resume ATS Analyzer"
+                description="Upload PDF or image resumes for 0-100 ATS scores, keyword matching, and fix roadmap."
+              />
+              <FeatureCard
+                icon={<BookOpen className="h-9 w-9 text-purple-600" />}
+                title="Curated Study Sheets"
+                description="Direct links to Striver's SDE Sheet, LeetCode SQL 50, System Design, and CS Core notes."
               />
             </div>
 
+            {/* Why Choose Section */}
             <div className="mt-20">
               <h2 className="text-3xl font-bold tracking-tight text-blue-700 sm:text-4xl">
-                Why Choose AI Mock Interview?
+                Why Prepare with HireReady AI?
               </h2>
               <div className="mt-10 flex flex-col items-center justify-center gap-8 lg:flex-row">
                 <div className="flex max-w-md flex-col items-center text-center">
-                  <Award className="h-16 w-16 text-blue-500" />
-                  <h3 className="mt-4 text-xl font-bold text-blue-700">Industry-Specific Questions</h3>
-                  <p className="mt-2 text-blue-600">
-                    Our platform offers tailored questions for various industries including tech, finance, healthcare,
-                    and more.
+                  <Award className="h-14 w-14 text-blue-500" />
+                  <h3 className="mt-4 text-lg font-bold text-blue-700">6 Free Starter Sessions</h3>
+                  <p className="mt-2 text-sm text-blue-600">
+                    Get 2 Technical Interviews, 2 Coding Rounds, and 2 Resume ATS Scans completely free to test your readiness.
                   </p>
                 </div>
                 <div className="flex max-w-md flex-col items-center text-center">
-                  <Clock className="h-16 w-16 text-blue-500" />
-                  <h3 className="mt-4 text-xl font-bold text-blue-700">Improve With Each Session</h3>
-                  <p className="mt-2 text-blue-600">
-                    Track your progress over time and see how your interview skills improve with each practice session.
+                  <Clock className="h-14 w-14 text-blue-500" />
+                  <h3 className="mt-4 text-lg font-bold text-blue-700">Realistic Recruiter AI</h3>
+                  <p className="mt-2 text-sm text-blue-600">
+                    Powered by Google Gemini 2.5 Flash with dedicated APIs for rapid, high-fidelity interview and resume feedback.
                   </p>
                 </div>
               </div>

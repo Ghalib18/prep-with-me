@@ -55,3 +55,19 @@ export const CodingInterview = pgTable("codingInterview", {
     userEmail: varchar("userEmail"),
     createdAt: varchar("createdAt"),
   });
+
+  export const ResumeAnalysis = pgTable("resumeAnalysis", {
+    id: serial("id").primaryKey(),
+    analysisId: varchar("analysisId").notNull(),
+    jobRole: varchar("jobRole").notNull(),
+    companyName: varchar("companyName"),
+    techStack: text("techStack"),
+    experience: varchar("experience"),
+    additionalInfo: text("additionalInfo"),
+    fileName: varchar("fileName"),
+    fileType: varchar("fileType"),
+    overallScore: varchar("overallScore"),
+    feedbackJson: text("feedbackJson").notNull(),
+    createdBy: varchar("createdBy").notNull(),
+    createdAt: varchar("createdAt").notNull(),
+  });

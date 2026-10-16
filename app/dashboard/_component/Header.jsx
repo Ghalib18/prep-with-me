@@ -1,7 +1,6 @@
 "use client"
 import React,{useEffect} from 'react'
 import { UserButton } from '@clerk/nextjs'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { useRouter } from "next/navigation";
 function Header() {
@@ -20,17 +19,22 @@ function Header() {
   const Click_upgrade = () => {
     router.push('/dashboard/upgrade');
 };
-const Click_HowIt = () => {
-  router.push('/dashboard/howit');
-};
+  const Click_HowIt = () => {
+    router.push('/dashboard/howit');
+  };
 
   useEffect(()=>{
     console.log(path)
   },[])
   return (
-    <div className='flex p-1.5 items-center justify-between bg-secondary shadow-md'>
-      <Image src='/logo.svg' alt="logo" width={100} height={80} />
-      <ul className='hidden md:flex gap-6'>
+    <div className='flex p-3 items-center justify-between bg-secondary shadow-md'>
+      <div onClick={handleClick} className='flex items-center cursor-pointer pl-1 select-none hover:opacity-90 transition-opacity'>
+        <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          HireReady AI
+        </span>
+      </div>
+      <ul className='hidden md:flex gap-6 items-center'>
+
         <li  onClick={handleClick}className={`hover:text-blue-600 hover:font-bold  text-blue-500 transition-all cursor-pointer
         ${path=='/dashboard'&&'text-blue-700 font-bold'}
         `}
@@ -45,6 +49,7 @@ const Click_HowIt = () => {
         ${path=='/dashboard/howit'&&'text-blue-700 font-bold'}
         `}>How its Work</li>
       </ul>
+
       <UserButton/>
     </div>
   )
