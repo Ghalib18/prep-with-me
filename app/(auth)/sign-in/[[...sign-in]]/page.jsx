@@ -1,52 +1,201 @@
-import { SignIn } from "@clerk/nextjs";
+"use client";
 
-export default function Page() {
+import { SignIn, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import Link from "next/link";
+import {
+  Terminal,
+  Sparkles,
+  CheckCircle2,
+  Code2,
+  FileSearch,
+  BookOpen,
+  ArrowLeft,
+  Award,
+  ShieldCheck,
+  Zap,
+} from "lucide-react";
+
+export default function SignInPage() {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.replace("/dashboard");
+    }
+  }, [isLoaded, isSignedIn, router]);
+
   return (
-    <section className="bg-white dark:bg-gray-900">
-      <div className="lg:grid lg:min-h-screen lg:grid-cols-12">
-        <section className="relative flex h-32 items-end bg-gray-900 lg:col-span-5 lg:h-full xl:col-span-6">
-          <img
-            alt=""
-            src="/1741529607505.jpeg"
-            className="absolute inset-0 h-full w-full object-cover opacity-80"
-          />
+    <div className="min-h-screen w-full bg-slate-950 text-slate-100 flex flex-col lg:flex-row relative overflow-hidden font-sans">
+      {/* Decorative Aurora Background Glows */}
+      <div className="absolute top-0 left-0 -mt-24 -ml-24 h-96 w-96 rounded-full bg-blue-600/15 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-0 -mb-24 -mr-24 h-96 w-96 rounded-full bg-purple-600/15 blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/3 h-80 w-80 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
 
-          
-        </section>
+      {/* Left Branding & Highlights Panel (Desktop) */}
+      <div className="relative z-10 hidden lg:flex lg:w-1/2 flex-col justify-between p-12 xl:p-16 border-r border-slate-800/80 bg-gradient-to-br from-slate-950 via-slate-900/90 to-indigo-950/40 backdrop-blur-xl">
+        <div>
+          {/* Header Link Back */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors group mb-8"
+          >
+            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+            <span>Back to Home</span>
+          </Link>
 
-        <main className="flex items-center justify-center px-8 py-8 sm:px-12 lg:col-span-7 lg:px-16 lg:py-12 xl:col-span-6">
-          <div className="max-w-xl lg:max-w-3xl">
-            <div className="relative -mt-16 block lg:hidden">
-              <a
-                className="inline-flex size-16 items-center justify-center rounded-full bg-white text-blue-600 sm:size-20 dark:bg-gray-900"
-                href="#"
-              >
-                <span className="sr-only">Home</span>
-                <svg
-                  className="h-8 sm:h-10"
-                  viewBox="0 0 28 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M0.41 10.3847C1.14777 7.4194 2.85643 4.7861 5.2639 2.90424C7.6714 1.02234 10.6393 0 13.695 0C16.7507 0 19.7186 1.02234 22.1261 2.90424C24.5336 4.7861 26.2422 7.4194 26.98 10.3847H25.78C23.7557 10.3549 21.7729 10.9599 20.11 12.1147C20.014 12.1842 19.9138 12.2477 19.81 12.3047H19.67C19.5662 12.2477 19.466 12.1842 19.37 12.1147C17.6924 10.9866 15.7166 10.3841 13.695 10.3841C11.6734 10.3841 9.6976 10.9866 8.02 12.1147C7.924 12.1842 7.8238 12.2477 7.72 12.3047H7.58C7.4762 12.2477 7.376 12.1842 7.28 12.1147C5.6171 10.9599 3.6343 10.3549 1.61 10.3847H0.41ZM23.62 16.6547C24.236 16.175 24.9995 15.924 25.78 15.9447H27.39V12.7347H25.78C24.4052 12.7181 23.0619 13.146 21.95 13.9547C21.3243 14.416 20.5674 14.6649 19.79 14.6649C19.0126 14.6649 18.2557 14.416 17.63 13.9547C16.4899 13.1611 15.1341 12.7356 13.745 12.7356C12.3559 12.7356 11.0001 13.1611 9.86 13.9547C9.2343 14.416 8.4774 14.6649 7.7 14.6649C6.9226 14.6649 6.1657 14.416 5.54 13.9547C4.4144 13.1356 3.0518 12.7072 1.66 12.7347H0V15.9447H1.61C2.39051 15.924 3.154 16.175 3.77 16.6547C4.908 17.4489 6.2623 17.8747 7.65 17.8747C9.0377 17.8747 10.392 17.4489 11.53 16.6547C12.1468 16.1765 12.9097 15.9257 13.69 15.9447C14.4708 15.9223 15.2348 16.1735 15.85 16.6547C16.9901 17.4484 18.3459 17.8738 19.735 17.8738C21.1241 17.8738 22.4799 17.4484 23.62 16.6547ZM23.62 22.3947C24.236 21.915 24.9995 21.664 25.78 21.6847H27.39V18.4747H25.78C24.4052 18.4581 23.0619 18.886 21.95 19.6947C21.3243 20.156 20.5674 20.4049 19.79 20.4049C19.0126 20.4049 18.2557 20.156 17.63 19.6947C16.4899 18.9011 15.1341 18.4757 13.745 18.4757C12.3559 18.4757 11.0001 18.9011 9.86 19.6947C9.2343 20.156 8.4774 20.4049 7.7 20.4049C6.9226 20.4049 6.1657 20.156 5.54 19.6947C4.4144 18.8757 3.0518 18.4472 1.66 18.4747H0V21.6847H1.61C2.39051 21.664 3.154 21.915 3.77 22.3947C4.908 23.1889 6.2623 23.6147 7.65 23.6147C9.0377 23.6147 10.392 23.1889 11.53 22.3947C12.1468 21.9165 12.9097 21.6657 13.69 21.6847C14.4708 21.6623 15.2348 21.9135 15.85 22.3947C16.9901 23.1884 18.3459 23.6138 19.735 23.6138C21.1241 23.6138 22.4799 23.1884 23.62 22.3947Z"
-                    fill="currentColor"
-                  />
-                </svg>
-              </a>
-
-              <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl dark:text-white">
-                Welcome to AI-Mock 🦑
-              </h1>
-
-              <p className="mt-4 leading-relaxed text-gray-500 dark:text-gray-400">
-              AI Mock Interview simulates real interviews and gives instant, personalized feedback to boost your preparation.
-              </p>
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white shadow-lg shadow-blue-500/25">
+              <Terminal className="h-6 w-6" />
             </div>
-            <SignIn />
+            <div>
+              <span className="text-2xl font-extrabold tracking-tight text-white block">
+                HireReady<span className="text-blue-500">.ai</span>
+              </span>
+              <span className="text-[11px] font-semibold text-blue-400 uppercase tracking-widest block">
+                AI Career Preparation Suite
+              </span>
+            </div>
           </div>
-        </main>
+
+          {/* Headline */}
+          <div className="mt-12 space-y-3">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 px-3 py-1 text-xs font-semibold text-blue-300">
+              <Sparkles className="h-3.5 w-3.5 text-blue-400" />
+              <span>Next-Gen Technical Interview Simulation</span>
+            </div>
+            <h1 className="text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight">
+              Prepare, Practice & Crack Your Dream Tech Role
+            </h1>
+            <p className="text-sm text-slate-400 leading-relaxed max-w-lg">
+              Log in to continue your personalized voice mock sessions, algorithmic coding rounds, resume ATS reviews, and curated sheets.
+            </p>
+          </div>
+
+          {/* Core Feature Pillars */}
+          <div className="mt-10 space-y-3.5">
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600/20 text-blue-400 border border-blue-500/30">
+                <Terminal className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Voice-Driven Mock Interviews</h4>
+                <p className="text-[11px] text-slate-400">Webcam eye contact, speech-to-text & instant rating.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
+                <Code2 className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Live Monaco Algorithmic Coding</h4>
+                <p className="text-[11px] text-slate-400">5 automated test cases & Big-O complexity diagnostics.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30">
+                <FileSearch className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">AI Resume ATS Scoring</h4>
+                <p className="text-[11px] text-slate-400">0-100 score, keyword gap detection & roadmap.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3.5 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-3.5">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-purple-600/20 text-purple-400 border border-purple-500/30">
+                <BookOpen className="h-4 w-4" />
+              </div>
+              <div>
+                <h4 className="text-xs font-bold text-white">Curated Sheets & Study Material</h4>
+                <p className="text-[11px] text-slate-400">Striver SDE Sheet, LeetCode Top SQL 50 & System Design.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Proof Strip */}
+        <div className="pt-8 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+          <div className="flex items-center gap-2">
+            <Award className="h-4 w-4 text-blue-400" />
+            <span>6 Free Starter Sessions</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-emerald-400" />
+            <span>Powered by Gemini 2.5 Flash</span>
+          </div>
+        </div>
       </div>
-    </section>
+
+      {/* Right Form Panel */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center items-center p-6 sm:p-10 lg:p-16">
+        {/* Mobile Header */}
+        <div className="w-full max-w-md lg:hidden mb-6 flex items-center justify-between">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+            <span>Home</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <Terminal className="h-4 w-4" />
+            </div>
+            <span className="font-extrabold text-sm text-white">HireReady.ai</span>
+          </div>
+        </div>
+
+        <div className="w-full max-w-md flex flex-col items-center">
+          <div className="text-center mb-6">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              Welcome Back
+            </h2>
+            <p className="mt-1.5 text-xs sm:text-sm text-slate-400">
+              Sign in to your account to continue your interview prep
+            </p>
+          </div>
+
+          {/* Clerk SignIn Component */}
+          <div className="w-full flex justify-center">
+            <SignIn
+              fallbackRedirectUrl="/dashboard"
+              forceRedirectUrl="/dashboard"
+              signUpUrl="/sign-up"
+              appearance={{
+                elements: {
+                  rootBox: "w-full",
+                  card: "bg-slate-900/90 border border-slate-800 shadow-2xl rounded-3xl p-6 backdrop-blur-xl w-full",
+                  headerTitle: "text-white text-lg font-bold",
+                  headerSubtitle: "text-slate-400 text-xs",
+                  socialButtonsBlockButton:
+                    "bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl transition-colors font-medium text-xs py-2.5",
+                  socialButtonsBlockButtonText: "text-slate-200 font-medium text-xs",
+                  dividerLine: "bg-slate-800",
+                  dividerText: "text-slate-500 text-xs",
+                  formFieldLabel: "text-slate-300 text-xs font-semibold",
+                  formFieldInput:
+                    "bg-slate-950/80 border border-slate-800 text-white rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-xs py-2.5",
+                  formButtonPrimary:
+                    "bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg shadow-blue-600/30 transition-all cursor-pointer",
+                  footerActionLink: "text-blue-400 hover:text-blue-300 font-semibold text-xs",
+                  identityPreviewText: "text-slate-300 text-xs",
+                  formFieldAction: "text-blue-400 hover:text-blue-300 text-xs",
+                },
+              }}
+            />
+          </div>
+
+          <div className="mt-6 text-center text-xs text-slate-500">
+            Protected by Clerk Authentication &bull; HireReady AI
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

@@ -3,6 +3,7 @@ import React,{useEffect} from 'react'
 import { UserButton } from '@clerk/nextjs'
 import { usePathname } from 'next/navigation'
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 function Header() {
  const router=useRouter()
   const path=usePathname();
@@ -42,6 +43,10 @@ function Header() {
         <li onClick={Click_Question}className={`hover:text-blue-600 hover:font-bold  text-blue-500 transition-all cursor-pointer
         ${path=='/dashboard/questions'&&'text-blue-700 font-bold'}
         `}>Questions</li>
+        <li onClick={() => toast.info("HireReady AI Chatbot is coming soon! Stay tuned. 🚀", { description: "We are actively developing your 24/7 AI interview coach." })} className='hover:text-violet-600 hover:font-bold transition-all text-violet-500 cursor-pointer flex items-center gap-1.5'>
+          <span>Chatbot</span>
+          <span className="text-[10px] font-bold bg-violet-100 text-violet-700 px-1.5 py-0.2 rounded-full border border-violet-200">Soon</span>
+        </li>
         <li  onClick={Click_upgrade}className={`hover:text-blue-600 hover:font-bold transition-all text-blue-500 cursor-pointer
         ${path=='/dashboard/upgrade'&&'text-blue-700 font-bold'}
         `}>Upgrade</li>
